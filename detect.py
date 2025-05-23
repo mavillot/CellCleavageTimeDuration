@@ -4,6 +4,7 @@ Run inference on images, videos, directories, streams, etc.
 
 Usage:
     $ python path/to/detect.py --source path/to/img.jpg --weights yolov5s.pt --img 640
+    $ python detect.py --source frames/frame_20.jpg --weights run/weights/best.pt --img 640
 """
 
 import argparse
@@ -29,8 +30,8 @@ from utils.torch_utils import select_device, load_classifier, time_sync
 
 @torch.no_grad()
 def run(weights='yolov5s.pt',  # model.pt path(s)
-        source='data/images',  # file/dir/URL/glob, 0 for webcam
-        imgsz=640,  # inference size (pixels)
+        source='frames',  # file/dir/URL/glob, 0 for webcam
+        imgsz=(640,640),  # inference size (pixels)
         conf_thres=0.25,  # confidence threshold
         iou_thres=0.45,  # NMS IOU threshold
         max_det=1000,  # maximum detections per image
@@ -92,7 +93,7 @@ def run(weights='yolov5s.pt',  # model.pt path(s)
 
     # Run inference
     if pt and device.type != 'cpu':
-        model(torch.zeros(1, 3, *imgsz).to(device).type_as(next(model.parameters())))  # run once
+        model(torch.zeros(1, 3, 640,640).to(device).type_as(next(model.parameters())))  # run once
     dt, seen = [0.0, 0.0, 0.0], 0
     for path, img, im0s, vid_cap in dataset:
         t1 = time_sync()
@@ -208,8 +209,8 @@ def run(weights='yolov5s.pt',  # model.pt path(s)
 def parse_opt():
     parser = argparse.ArgumentParser()
     parser.add_argument('--weights',  type=str, default='runs/weights/best.pt')
-    parser.add_argument('--source', type=str, default='resources/data/ODFrames')
-    parser.add_argument('--imgsz', type=int, default=[416,416])
+    parser.add_argument('--source', type=str, default='frames')
+    parser.add_argument('--imgsz', nargs='+', type=int, default=(640,640), help='inference size h w')
     parser.add_argument('--conf-thres', type=float, default=0.30)
     parser.add_argument('--iou-thres', type=float, default=0.45)
     parser.add_argument('--max-det', type=int, default=1000)
